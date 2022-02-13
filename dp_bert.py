@@ -55,9 +55,12 @@ def download_and_extract(dataset_url, data_dir):
 
 
 snli_folder = os.path.join(DATA_DIR, 'snli_1.0')
-os.listdir(snli_folder)
+# os.listdir(snli_folder)
 
-download_and_extract(STANFORD_SNLI_URL, DATA_DIR)
+if not os.path.exists(snli_folder):
+    download_and_extract(STANFORD_SNLI_URL, DATA_DIR)
+else:
+    pass
 
 train_path = os.path.join(snli_folder, "snli_1.0_train.txt")
 dev_path = os.path.join(snli_folder, "snli_1.0_dev.txt")
@@ -65,7 +68,7 @@ dev_path = os.path.join(snli_folder, "snli_1.0_dev.txt")
 df_train = pd.read_csv(train_path, sep='\t')
 df_test = pd.read_csv(dev_path, sep='\t')
 
-df_train[['sentence1', 'sentence2', 'gold_label']][:5]
+# df_train[['sentence1', 'sentence2', 'gold_label']][:5]
 
 
 # BERT Model
@@ -207,6 +210,12 @@ model = model.to(device)
 
 # Set the model to train mode (HuggingFace models load in eval mode)
 model = model.train()
+
+# ----------------------------------
+# TODO: test to check/fix model
+print(f'test if model is valid for DP: {ModuleValidator.is_valid(model)}')
+# model = ModuleValidator.fix(model)
+# ----------------------------------
 
 # Define optimizer
 optimizer = torch.optim.AdamW(model.parameters(), lr=5e-4, eps=1e-8)
