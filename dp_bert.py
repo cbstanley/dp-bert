@@ -12,6 +12,7 @@ Takes a pre-trained BERT-base model and fine-tunes on SNLI dataset
 '''
 
 import os
+import argparse
 import pickle
 import numpy as np
 import pandas as pd
@@ -35,6 +36,21 @@ from opacus import PrivacyEngine
 from opacus.utils.uniform_sampler import UniformWithReplacementSampler
 from opacus.utils.batch_memory_manager import BatchMemoryManager
 from opacus.validators import ModuleValidator
+
+
+def get_args():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--batch_size', type=int, default=32, help='batch size')
+    parser.add_argument('--max_batch_size', type=int, default=8, help='max physical batch size')
+    parser.add_argument('--epochs', type=int, default=3, help='epochs')
+    parser.add_argument('--log_interval', type=int, default=5000, help='logging interval')
+    parser.add_argument('--epsilon', type=float, default=7.5, help='epsilon DP')
+    parser.add_argument('--max_grad_norm', type=float, default=0.1, help='max grad norm')
+
+    args = parser.parse_args()
+
+    return args
 
 
 # Dataset
@@ -187,19 +203,29 @@ test_features = _df_to_features(df_test, "test")
 train_dataset = _features_to_dataset(train_features)
 test_dataset = _features_to_dataset(test_features)
 
+# Get argparse
+args = get_args()
 
 # Choose batch size for DP
-BATCH_SIZE = 32
-MAX_PHYSICAL_BATCH_SIZE = 8
-EPOCHS = 3
-LOGGING_INTERVAL = 5000 # once every how many steps we run evaluation cycle and report metrics
+# BATCH_SIZE = 32
+# MAX_PHYSICAL_BATCH_SIZE = 8
+BATCH_SIZE = args.batch_size
+MAX_PHYSICAL_BATCH_SIZE = args.max_batch_size
+
+# EPOCHS = 3
+# LOGGING_INTERVAL = 5000 # once every how many steps we run evaluation cycle and report metrics
+EPOCHS = args.epochs
+LOGGING_INTERVAL = args.log_interval # once every how many steps we run evaluation cycle and report metrics
 
 train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE)
 test_dataloader = DataLoader(test_dataset, sampler=SequentialSampler(test_dataset), batch_size=BATCH_SIZE)
 
-EPSILON = 7.5
+# EPSILON = 7.5
+# DELTA = 1 / len(train_dataloader) # Parameter for privacy accounting. Probability of not achieving privacy guarantees
+# MAX_GRAD_NORM = 0.1
+EPSILON = args.epsilon
 DELTA = 1 / len(train_dataloader) # Parameter for privacy accounting. Probability of not achieving privacy guarantees
-MAX_GRAD_NORM = 0.1
+MAX_GRAD_NORM = args.max_grad_norm
 
 
 # Training
