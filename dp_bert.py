@@ -41,6 +41,7 @@ from opacus.validators import ModuleValidator
 def get_args():
     parser = argparse.ArgumentParser()
 
+    parser.add_argument('--model_name', type=str, default='bert-base-cased', help='bert model')
     parser.add_argument('--batch_size', type=int, default=32, help='batch size')
     parser.add_argument('--max_batch_size', type=int, default=8, help='max physical batch size')
     parser.add_argument('--epochs', type=int, default=3, help='epochs')
@@ -86,9 +87,11 @@ df_test = pd.read_csv(dev_path, sep='\t')
 
 # df_train[['sentence1', 'sentence2', 'gold_label']][:5]
 
+# get argparse
+args = get_args()
 
 # BERT Model
-model_name = "bert-base-cased"
+model_name = args.model_name
 
 config = BertConfig.from_pretrained(
     model_name,
@@ -96,12 +99,12 @@ config = BertConfig.from_pretrained(
 )
 
 tokenizer = BertTokenizer.from_pretrained(
-    "bert-base-cased",
+    model_name,
     do_lower_case=False,
 )
 
 model = BertForSequenceClassification.from_pretrained(
-    "bert-base-cased",
+    model_name,
     config=config,
 )
 
@@ -203,8 +206,6 @@ test_features = _df_to_features(df_test, "test")
 train_dataset = _features_to_dataset(train_features)
 test_dataset = _features_to_dataset(test_features)
 
-# Get argparse
-args = get_args()
 
 # Choose batch size for DP
 # BATCH_SIZE = 32
