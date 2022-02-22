@@ -208,22 +208,14 @@ test_dataset = _features_to_dataset(test_features)
 
 
 # Choose batch size for DP
-# BATCH_SIZE = 32
-# MAX_PHYSICAL_BATCH_SIZE = 8
 BATCH_SIZE = args.batch_size
 MAX_PHYSICAL_BATCH_SIZE = args.max_batch_size
-
-# EPOCHS = 3
-# LOGGING_INTERVAL = 5000 # once every how many steps we run evaluation cycle and report metrics
 EPOCHS = args.epochs
 LOGGING_INTERVAL = args.log_interval # once every how many steps we run evaluation cycle and report metrics
 
 train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE)
 test_dataloader = DataLoader(test_dataset, sampler=SequentialSampler(test_dataset), batch_size=BATCH_SIZE)
 
-# EPSILON = 7.5
-# DELTA = 1 / len(train_dataloader) # Parameter for privacy accounting. Probability of not achieving privacy guarantees
-# MAX_GRAD_NORM = 0.1
 EPSILON = args.epsilon
 DELTA = 1 / len(train_dataloader) # Parameter for privacy accounting. Probability of not achieving privacy guarantees
 MAX_GRAD_NORM = args.max_grad_norm
@@ -307,9 +299,9 @@ for epoch in range(1, EPOCHS+1):
 
             batch = tuple(t.to(device) for t in batch)
             inputs = {'input_ids':    batch[0],
-                    'attention_mask': batch[1],
-                    'token_type_ids': batch[2],
-                    'labels':         batch[3]}
+                      'attention_mask': batch[1],
+                      'token_type_ids': batch[2],
+                      'labels':         batch[3]}
 
             outputs = model(**inputs) # output = loss, logits, hidden_states, attentions
 
